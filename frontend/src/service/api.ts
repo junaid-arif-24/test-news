@@ -6,7 +6,13 @@ console.log(import.meta.env.REACT_APP_API_BASE_URL)
 const apiClient = axios.create({
     baseURL: API_BASE_URL,
 })
-
+const setAuthToken = (token:string) =>{
+    if(token){
+        apiClient.defaults.headers.common["Authorization"] = `Bearer ${token}`
+    }else {
+        delete apiClient.defaults.headers.common["Authorization"] ;
+    }
+}
 export const login = async (email:string , password:string) =>{
     const response = await apiClient.post(`/api/auth/login`,{ email, password});
     localStorage.setItem("token",response.data.token);
@@ -33,18 +39,34 @@ export const getUser = async () =>{
     return response.data;
 }
 
-const setAuthToken = (token:string) =>{
-    if(token){
-        apiClient.defaults.headers.common["Authorization"] = `Bearer ${token}`
-    }else {
-        delete apiClient.defaults.headers.common["Authorization"] ;
-    }
-}
+
 
 export const fetchCategories = async () : Promise<Category[]> => {
     const  response  = await apiClient.get("/api/categories");
     return response.data as Category[];
 
+}
+
+// Create a category
+
+export const createCategory = async (name: string): Promise<Category > =>{
+    const response = await apiClient.post("/api/categories/create",{name});
+    return response.data as Category;
+}
+
+// Update a category
+
+export const updateCategory = async (id:string, name : string): Promise<Category > =>{
+    const response = await apiClient.put(`/api/categories/update/${id}`, {name});
+
+    return response.data as Category;
+}
+
+
+// Delete a category
+
+export const deleteCategory =  async (id: string) : Promise<void> =>{
+    await apiClient.delete(`/api/categories/delete/${id}`)
 }
 
 export const fetchSubcribedCategories = async() : Promise<Category[]> => {

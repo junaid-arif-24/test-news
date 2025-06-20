@@ -12,9 +12,9 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Footer from "./components/Footer";
 import CategoryPage from "./pages/CategoryPage";
-import ManageCategories from "./pages/ManageCategories";
 import AdminRoute from "./components/AdminRoute";
 import AdminDashboard from "./pages/AdminDashboard";
+import ManageCategories from "./pages/ManageCategories";
 
 function App() {
   return (
@@ -35,6 +35,7 @@ function App() {
                 <AdminDashboard>
                   <Routes>
                   <Route path="manage-category" element={<ManageCategories />}/>
+                  
                   <Route path="/*" element={<div>Not found</div>} />
                   </Routes>
                   

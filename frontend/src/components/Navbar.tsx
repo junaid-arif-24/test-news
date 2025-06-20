@@ -98,7 +98,7 @@ const Navbar: React.FC = () => {
     if (path === "/register") return "Register";
     if (path === "/all-news") return category || "All News";
     if (path === "/category") return "All Categories";
-    if (path === "/admin/profile") return "Admin Dashboard";
+    if (path === "/admin/manage-category") return "Admin Dashboard";
     if (path === "/profile") return "Profile";
 
     return null;

@@ -9,7 +9,7 @@ export interface AdminRouteProps {
 
 const AdminRoute:React.FC<AdminRouteProps > = ({children}) => {
 
-  const {isAuthenticated, user , loading} = useAuth();
+  const { isAuthenticated, user, loading } = useAuth();
 
   if(loading){
     return (
