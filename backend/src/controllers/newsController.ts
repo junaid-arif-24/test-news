@@ -67,13 +67,11 @@ export const getNewsById = async (req: Request, res: Response) => {
   const { id } = req.params;
 
   try {
-    const news = News.findByIdAndUpdate(
+    const news = await News.findByIdAndUpdate(
       id,
       { $inc: { views: 1 } },
       { new: true }
-    )
-      .populate("category", "name")
-      .exec();
+    ).populate("category", "name").exec();
     if (!news) {
        res.status(401).json({ message: "News Not Found" });
        return

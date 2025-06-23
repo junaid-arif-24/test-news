@@ -15,6 +15,7 @@ import CategoryPage from "./pages/CategoryPage";
 import AdminRoute from "./components/AdminRoute";
 import AdminDashboard from "./pages/AdminDashboard";
 import ManageCategories from "./pages/ManageCategories";
+import CreateNewsPage from "./pages/CreateNewsPage";
 
 function App() {
   return (
@@ -34,7 +35,9 @@ function App() {
               <AdminRoute>
                 <AdminDashboard>
                   <Routes>
+                  <Route path="create-news" element={<CreateNewsPage />} />
                   <Route path="manage-category" element={<ManageCategories />}/>
+                  
                   
                   <Route path="/*" element={<div>Not found</div>} />
                   </Routes>
