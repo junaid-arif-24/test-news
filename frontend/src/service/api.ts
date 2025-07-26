@@ -126,8 +126,17 @@ export const createOrUpdateNews = async (
 
 // get all news
 
-export const fetchNews = async () => {
-  const response = await apiClient.get("/api/news");
+export const fetchNews = async (filters:{
+  title?: string;
+  description?: string;
+  date?: string;
+  tags? : string;
+  category?: string
+  visibility?: string
+}): Promise<News[] > => {
+  const response = await apiClient.get("/api/news",{
+    params : {...filters}
+  });
   return response.data as News[];
 };
 
@@ -140,6 +149,6 @@ export const fetchNewsById = async (id: string) => {
 
 //delete news
 
-export const deletNews = async(id:string)=>{
+export const deleteNews = async(id:string)=>{
     await apiClient.delete(`/api/news/${id}`);
 }

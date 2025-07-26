@@ -55,8 +55,30 @@ export const createNews = async (req: Request, res: Response) => {
 };
 
 export const getAllNews = async (req: Request, res: Response) => {
+  const { title, description,date, tags, category, visibility} = req.query;
+  const query: any = {};
+
+  if(title) query.title = {$regex:title, $options: "i"};
+  if(description) query.description = { $regex  : description, $options:"i"};
+  if (date) query.date = new Date(date as string);
+  if(typeof tags === "string" && tags!== "") query.tags = {$in: tags.split(",")}
+  if(category) {
+    const categoryDoc = await Category.findOne({name:category})
+    if(categoryDoc){
+      query.category = categoryDoc._id;
+    }else{
+      res.status(400).json({message: " category not found"})
+      return;
+    }
+  }
+  if (typeof visibility === "string"){
+    if(visibility !== "all"){
+      query.visibility = visibility;
+    }
+  }
+
   try {
-    const news = await News.find().populate("category", "name");
+    const news = await News.find(query).populate("category", "name");
     res.status(200).json(news);
   } catch (error) {
     res.status(400).json({ message: "Error fetching News", error });

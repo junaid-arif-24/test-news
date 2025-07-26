@@ -16,6 +16,7 @@ import AdminRoute from "./components/AdminRoute";
 import AdminDashboard from "./pages/AdminDashboard";
 import ManageCategories from "./pages/ManageCategories";
 import CreateNewsPage from "./pages/CreateNewsPage";
+import ManageNews from "./pages/ManageNews";
 
 function App() {
   return (
@@ -37,6 +38,7 @@ function App() {
                   <Routes>
                   <Route path="create-news" element={<CreateNewsPage />} />
                   <Route path="manage-category" element={<ManageCategories />}/>
+                  <Route path="manage-news" element={<ManageNews />} />
                   
                   
                   <Route path="/*" element={<div>Not found</div>} />
