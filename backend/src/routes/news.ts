@@ -14,8 +14,17 @@ router.post('/create',auth,checkRole(['admin']),upload.array('images',12), newsC
 // Get all news
 router.get('/', newsController.getAllNews)
 
+//get trending news
+router.get('/trending',newsController.getTrendingNews);
+
+//get Latest News
+router.get('/latest',newsController.getLatestNews);
+
 // get news by id
 router.get('/:id',newsController.getNewsById)
+
+//get related news
+router.get('/relatable/:id', newsController.getRelatedNews)
 
 // update news
 router.put('/:id',auth ,checkRole(['admin']),upload.array("images",12), newsController.updateNews)

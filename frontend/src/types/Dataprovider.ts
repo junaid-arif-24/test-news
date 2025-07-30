@@ -25,6 +25,7 @@ export interface News {
   description: string;
   images : string[];
   category : Category;
+  date: string;
   time : string;
   tags:string[];
   visibility: string;

@@ -101,76 +101,85 @@ const ManageNews = () => {
       <div className="bg-white p-4 rounded shadow mb-4">
         <h2 className="text-xl font-bold mb-2">Search News</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <input 
+          <input
             type="text"
             placeholder="title"
             value={searchTitle}
-            onChange={(e: ChangeEvent<HTMLInputElement>)=> setSearchTitle(e.target.value)}
+            onChange={(e: ChangeEvent<HTMLInputElement>) =>
+              setSearchTitle(e.target.value)
+            }
             className="p-2 border rounded"
-
-            />
-              <input 
+          />
+          <input
             type="text"
             placeholder="description"
             value={searchDescription}
-            onChange={(e: ChangeEvent<HTMLInputElement>)=> setSearchDescription(e.target.value)}
+            onChange={(e: ChangeEvent<HTMLInputElement>) =>
+              setSearchDescription(e.target.value)
+            }
             className="p-2 border rounded"
-
-            />
-              <input 
+          />
+          <input
             type="date"
             value={searchDate}
-            onChange={(e: ChangeEvent<HTMLInputElement>)=> setSearchDate(e.target.value)}
+            onChange={(e: ChangeEvent<HTMLInputElement>) =>
+              setSearchDate(e.target.value)
+            }
             className="p-2 border rounded"
-
-            />
-              <input 
+          />
+          <input
             type="text"
             placeholder="tags (comma separated"
-            value={searchTitle}
-            onChange={(e: ChangeEvent<HTMLInputElement>)=> setSearchTitle(e.target.value)}
+            value={searchTags}
+            onChange={(e: ChangeEvent<HTMLInputElement>) =>
+              setSearchTitle(e.target.value)
+            }
             className="p-2 border rounded"
+          />
 
-            />
+          <select
+            value={searchCategory}
+            className="p-2 border rounded"
+            onChange={(e: ChangeEvent<HTMLSelectElement>) =>
+              setSearchCategory(e.target.value)
+            }
+          >
+            {categories.length > 0 ? (
+              categories.map((category) => (
+                <option key={category._id} value={category.name}>
+                  {category.name}
+                </option>
+              ))
+            ) : (
+              <option value={""} disabled>
+                No category Available
+              </option>
+            )}
+          </select>
 
-            <select  value={searchCategory} className="p-2 border rounded"
-            onChange={(e:ChangeEvent<HTMLSelectElement>)=> setSearchCategory(e.target.value)}
-
-            >
-                {categories.length > 0 ? (categories.map((category)=>(
-                    <option key={category._id} value={category.name}>
-                        {category.name}
-                    </option>
-                ))):(
-                    <option value={""} disabled  >No category Available</option>
-                )}
-
-            </select>
-
-            <select className="p-2 border rounded"
+          <select
+            className="p-2 border rounded"
             value={searchVisibility}
-            onChange={(e:ChangeEvent<HTMLSelectElement>)=>setSearchVisibility(e.target.value)}
-            >
-                <option value={""} disabled>Select Visibility</option>
-                <option value={"all"}> All</option>
+            onChange={(e: ChangeEvent<HTMLSelectElement>) =>
+              setSearchVisibility(e.target.value)
+            }
+          >
+            <option value={""} disabled>
+              Select Visibility
+            </option>
+            <option value={"all"}> All</option>
 
-                <option value={"public"} >Public</option>
-                <option value={"private"} >Private</option>
+            <option value={"public"}>Public</option>
+            <option value={"private"}>Private</option>
+          </select>
 
-
-            </select>
-
-            <button 
+          <button
             className="mt-4 bg-green-500 text-white  px-4 py-2 rounded"
             onClick={fetchAllNews}
-            
-            > 
+          >
             Search
-
-            </button>
-
+          </button>
         </div>
-
       </div>
 
       <div className="grid grid-cols-1 gap-4">
@@ -179,7 +188,73 @@ const ManageNews = () => {
             <Loader loading={loading} />
           </div>
         ) : newsList && newsList.length > 0 ? (
-          <></>
+          newsList.map((news) => (
+            <div
+              key={news._id}
+              className="bg-white flex flex-col md:flex-row gap-5 justify-between rounded shadow"
+            >
+              <div className="md:w-[30%] max-h-[330px]">
+                <img
+                  src={news.images.length > 0 ? news.images[0] : ""}
+                  alt={news.title || "News Image"}
+                  className="w-full h-full object-cover rounded-l-lg mb-4"
+                />
+              </div>
+              <div  className="md:w-[70%] p-4">
+                <h2 className="text-2xl font-bold">{news.title || "No Title"}</h2>
+                <div >
+                  {parse(news.description ? news.description.substring(0,300) : "")}
+                  </div>
+                  <div>
+
+                    {news.tags && news.tags.length > 0 ? news.tags.map((tag,index)=>(
+                      <span
+                      key={index}
+                      className="inline-block bg-blue-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 mr-2 mb-2"
+                      
+                      >
+                        #{tag}
+
+                      </span>
+                    )):<span
+                    className="inline-block bg-blue-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 mr-2 mb-2"
+                    
+                    > No tags</span>}
+                    </div>
+                    <div  className="text-blue-500 font-bold text-sm">
+                      {formatDate(news.date || "")} at {news.time || "Unknown Time"} | { news.category.name  || "No category"} | {news.visibility || "Unknown"}
+
+                      </div>
+
+                      <div className="mt-4 flex justify-end space-x-2">
+                        <button className="bg-yellow-500  text-white px-4 py-2 rounded" onClick={()=>{}}> 
+
+                          Preview
+
+
+                          </button>
+
+                          <button className="bg-green-500 text-white px-4 py-2 rounded" 
+                          onClick={()=>handleEdit(news)}
+                          > 
+
+                            Edit
+
+
+                          </button>
+
+                          <button className="bg-red-500 text-white px-4 py-2 rounded"
+                          onClick={()=>handleDelete(news._id)}
+                          >
+                            Delete 
+
+                          </button>
+
+                        </div>
+
+                </div>
+            </div>
+          ))
         ) : (
           <div className="flex items-center justify-center h-64 bg-white p-4 rounded shadow">
             <h2 className="text-2xl font-bold text-gray-700">

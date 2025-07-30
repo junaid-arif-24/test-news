@@ -17,8 +17,8 @@ export const createNews = async (req: Request, res: Response) => {
     req.body;
   const files = req.files as Express.Multer.File[];
   if (!files) {
-     res.status(400).json({ message: "No files were uploaded" });
-     return;
+    res.status(400).json({ message: "No files were uploaded" });
+    return;
   }
 
   try {
@@ -42,6 +42,7 @@ export const createNews = async (req: Request, res: Response) => {
       images: imageUrls,
       date,
       time,
+      category,
       tags: tags.split(","),
       visibility,
       youtubeUrl,
@@ -54,25 +55,76 @@ export const createNews = async (req: Request, res: Response) => {
   }
 };
 
+export const getTrendingNews = async (req: Request, res: Response) => {
+  try {
+    const trendingNews = await News.find({
+      visibility: "public",
+      views: { $gt: 10 },
+    })
+      .populate("category", "name")
+      .sort({ views: -1 })
+      .limit(5);
+      res.status(200).json(trendingNews);
+  } catch (error) {
+
+    res.status(400).json({message: "Error in fetching trending news",error});
+  }
+};
+
+export const getLatestNews = async (req:Request, res: Response)=>{
+  try {
+    const latestNews = await News.find().sort({date:-1}).limit(10);
+    res.status(200).json(latestNews)
+    
+  } catch (error) {
+    res.status(400).json({message:"Error in fetching Latest News", error})
+    
+  }
+}
+
+export const getRelatedNews = async (req:Request, res:Response)=>{
+  const {id} = req.params;
+  try {
+    const currentNews = await News.findById(id).populate("category");
+    if(!currentNews){
+      res.status(404).json({message:"News not found"})
+      return;
+    }
+    const relatedNews = await News.find({
+      _id :{$ne:id},
+      category:currentNews.category,
+      tags:{$in:currentNews.tags}
+    }).limit(4);
+
+    res.status(200).json(relatedNews);
+    
+  } catch (error) {
+    console.log("Error in fetching related News",error)
+    res.status(400).json({message:"Error fetching related News",error})
+    
+  }
+}
+
 export const getAllNews = async (req: Request, res: Response) => {
-  const { title, description,date, tags, category, visibility} = req.query;
+  const { title, description, date, tags, category, visibility } = req.query;
   const query: any = {};
 
-  if(title) query.title = {$regex:title, $options: "i"};
-  if(description) query.description = { $regex  : description, $options:"i"};
+  if (title) query.title = { $regex: title, $options: "i" };
+  if (description) query.description = { $regex: description, $options: "i" };
   if (date) query.date = new Date(date as string);
-  if(typeof tags === "string" && tags!== "") query.tags = {$in: tags.split(",")}
-  if(category) {
-    const categoryDoc = await Category.findOne({name:category})
-    if(categoryDoc){
+  if (typeof tags === "string" && tags !== "")
+    query.tags = { $in: tags.split(",") };
+  if (category) {
+    const categoryDoc = await Category.findOne({ name: category });
+    if (categoryDoc) {
       query.category = categoryDoc._id;
-    }else{
-      res.status(400).json({message: " category not found"})
+    } else {
+      res.status(400).json({ message: " category not found" });
       return;
     }
   }
-  if (typeof visibility === "string"){
-    if(visibility !== "all"){
+  if (typeof visibility === "string") {
+    if (visibility !== "all") {
       query.visibility = visibility;
     }
   }
@@ -93,91 +145,97 @@ export const getNewsById = async (req: Request, res: Response) => {
       id,
       { $inc: { views: 1 } },
       { new: true }
-    ).populate("category", "name").exec();
+    )
+      .populate("category", "name")
+      .exec();
     if (!news) {
-       res.status(401).json({ message: "News Not Found" });
-       return
+      res.status(401).json({ message: "News Not Found" });
+      return;
     }
 
-     res.status(200).json(news);
+    res.status(200).json(news);
   } catch (error) {
     res.status(400).json({ mesaage: "Error in Fetching News" });
   }
 };
 
-export const updateNews = async (req:Request, res:Response)=>{
-    const {id } = req.params;
-    const {title, description,category,tags,visibility,youtubeUrl,removedImages} = req.body;
-    const files = req.files as Express.Multer.File[];
+export const updateNews = async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const {
+    title,
+    description,
+    category,
+    tags,
+    visibility,
+    youtubeUrl,
+    removedImages,
+  } = req.body;
+  const files = req.files as Express.Multer.File[];
 
-    try {
-        const newsToUpdate = await News.findById(id);
-        if(!newsToUpdate){
-             res.status(404).json({message: "News not found"})
-             return;
-
-        }
-        // Handle Image Removal
-
-        if(removedImages && removedImages.length > 0){
-            let removedImagesArray = Array.isArray(removedImages)? removedImages : JSON.parse(removedImages);
-
-            for( const imageUrl of removedImagesArray){
-                const regex = /\/news_images\/([^\/]+)\.[a-zA-Z]+$/;
-                const match = imageUrl.match(regex);
-                if(match && match[1]){
-                    const publicId = match[1]
-                    await cloudinary.uploader.destroy(`new_images_folder/${publicId}`)
-                }
-            }
-
-            newsToUpdate.images = newsToUpdate.images.filter((img)=>!removedImagesArray.includes(img))
-        }
-
-        if (files && files.length >0 ){
-            const uploadPromises = files.map((file)=>
-            cloudinary.uploader.upload(file.path,{
-                folder:"new_images_folder",
-                format: "jpeg"
-            })
-            )
-            const uploadResults = await Promise.all(uploadPromises);
-            const imageUrls =  uploadResults.map((result)=>result.secure_url)
-
-            newsToUpdate.images = [...newsToUpdate.images, ...imageUrls];
-
-           
-        }
-         //update the news fields
-
-         newsToUpdate.title = title ||  newsToUpdate.title;
-         newsToUpdate.description =  description || newsToUpdate.description;
-         newsToUpdate.category =  category || newsToUpdate.category;
-         newsToUpdate.tags = tags ? tags.split(","): null;
-         newsToUpdate.visibility = visibility || newsToUpdate.visibility;
-         newsToUpdate.youtubeUrl =  youtubeUrl || newsToUpdate.youtubeUrl;
-
-         const updatedNews = await newsToUpdate.save();
-         res.status(200).json(updatedNews);
-
-        
-    } catch (error) {
-        console.error("Error in Updating News", error)
-        res.status(400).json({message: "Error Updating News"})
-        
+  try {
+    const newsToUpdate = await News.findById(id);
+    if (!newsToUpdate) {
+      res.status(404).json({ message: "News not found" });
+      return;
     }
-}
+    // Handle Image Removal
 
-export const deleteNews = async (req:Request, res:Response) =>{
-const {id } = req.params;
+    if (removedImages && removedImages.length > 0) {
+      let removedImagesArray = Array.isArray(removedImages)
+        ? removedImages
+        : JSON.parse(removedImages);
 
-try{
+      for (const imageUrl of removedImagesArray) {
+        const regex = /\/news_images\/([^\/]+)\.[a-zA-Z]+$/;
+        const match = imageUrl.match(regex);
+        if (match && match[1]) {
+          const publicId = match[1];
+          await cloudinary.uploader.destroy(`new_images_folder/${publicId}`);
+        }
+      }
+
+      newsToUpdate.images = newsToUpdate.images.filter(
+        (img) => !removedImagesArray.includes(img)
+      );
+    }
+
+    if (files && files.length > 0) {
+      const uploadPromises = files.map((file) =>
+        cloudinary.uploader.upload(file.path, {
+          folder: "new_images_folder",
+          format: "jpeg",
+        })
+      );
+      const uploadResults = await Promise.all(uploadPromises);
+      const imageUrls = uploadResults.map((result) => result.secure_url);
+
+      newsToUpdate.images = [...newsToUpdate.images, ...imageUrls];
+    }
+    //update the news fields
+
+    newsToUpdate.title = title || newsToUpdate.title;
+    newsToUpdate.description = description || newsToUpdate.description;
+    newsToUpdate.category = category || newsToUpdate.category;
+    newsToUpdate.tags = tags ? tags.split(",") : null;
+    newsToUpdate.visibility = visibility || newsToUpdate.visibility;
+    newsToUpdate.youtubeUrl = youtubeUrl || newsToUpdate.youtubeUrl;
+
+    const updatedNews = await newsToUpdate.save();
+    res.status(200).json(updatedNews);
+  } catch (error) {
+    console.error("Error in Updating News", error);
+    res.status(400).json({ message: "Error Updating News" });
+  }
+};
+
+export const deleteNews = async (req: Request, res: Response) => {
+  const { id } = req.params;
+
+  try {
     await News.findByIdAndDelete(id);
-    res.status(200).json({message  : "News Deleted"})
-
-} catch (error){
-    console.error("Error in Deleting News", error)
-    res.status(400).json({message  : "Error in Deleting News"})
-}
-
-}
+    res.status(200).json({ message: "News Deleted" });
+  } catch (error) {
+    console.error("Error in Deleting News", error);
+    res.status(400).json({ message: "Error in Deleting News" });
+  }
+};

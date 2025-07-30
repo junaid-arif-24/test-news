@@ -52,6 +52,7 @@ const CreateNewsPage = () => {
       setTags([...newsToEdit.tags]);
       setCategory(newsToEdit.category._id);
       setVisibilty(newsToEdit.visibility as "public" | "private");
+      setExistingImages(newsToEdit.images);
       setIsEdit(true);
     }
   }, [newsToEdit]);

@@ -146,6 +146,24 @@ export const fetchNewsById = async (id: string) => {
   return response.data as News;
 };
 
+//Related News Function
+export const fetchRelatedNews = async(newsId:string):Promise<News[]>=>{
+  const response =  await apiClient.get(`/api/news/relatable/${newsId}`);
+  return response.data as News[];
+}
+
+// Latest News Function
+export const fetchLatestNews = async(): Promise<News[]> =>{
+  const response = await apiClient.get('/api/news/latest');
+  return response.data as News[];
+}
+
+//Trending News Fucntion
+export const fetchTrendingNews =async():Promise<News[]> =>{
+  const response = await apiClient.get('/api/news/trending');
+  return response.data as News[]
+}
+
 
 //delete news
 
