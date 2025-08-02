@@ -5,10 +5,12 @@ import { fetchNews } from '../service/api'
 import { toast } from 'react-toastify'
 import Marquee from "react-fast-marquee"
 import LatestNews from '../components/LatestNews'
+import TrendingNews from '../components/TrendingNews'
+import NewsList from '../components/NewsList'
 const HomePage = () => {
   const [newsList,setNewsList] = useState<News[]>([])
   const [isLoading, setIsLoading] =  useState<boolean>(true)
-
+ const navigate = useNavigate();
   const fetchFilteredNews = async()=>{
     setIsLoading(true)
     try {
@@ -50,6 +52,12 @@ const HomePage = () => {
 
       </Marquee>
       <LatestNews />
+      <TrendingNews />
+
+      <NewsList newsList={newsList} isLoading={isLoading } />
+      <p  onClick={()=> navigate("/all-news")} className='text-blue-500 underline text-xl cursor-pointer text-right mx-5'>
+        {`see all ->`}
+      </p>
 
 
     </div>

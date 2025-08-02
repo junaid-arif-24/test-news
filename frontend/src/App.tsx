@@ -17,6 +17,8 @@ import AdminDashboard from "./pages/AdminDashboard";
 import ManageCategories from "./pages/ManageCategories";
 import CreateNewsPage from "./pages/CreateNewsPage";
 import ManageNews from "./pages/ManageNews";
+import AllNews from "./pages/AllNews";
+import CategoryNews from "./pages/CategoryNews";
 
 function App() {
   return (
@@ -32,6 +34,8 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/category" element={<CategoryPage /> } />
+            <Route path="/all-news" element={<AllNews />} />
+            <Route path="category/:cat_name" element={<CategoryNews />} />
             <Route path="/admin/*" element={
               <AdminRoute>
                 <AdminDashboard>
