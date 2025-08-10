@@ -13,11 +13,16 @@ import Loader from "../components/Loader";
 import {
   fetchNewsById,
   fetchRelatedNews,
+  fetchSavedNews,
   fetchTrendingNews,
+  savedNewsbyId,
+  unsaveNewsbyId,
 } from "../service/api";
-import { News } from "../types/Dataprovider";
+import { Comment, News, SavedNewsId } from "../types/Dataprovider";
 import { IconButton } from "@mui/material";
 import { ArrowBackIos, ArrowForwardIos } from "@mui/icons-material";
+import { FaBookmark, FaRegBookmark } from "react-icons/fa";
+import Comments from "../components/Comments";
 
 const NewsDetails = () => {
   const { id } = useParams<{ id: string }>();
@@ -25,6 +30,8 @@ const NewsDetails = () => {
   const [news, setNews] = useState<News | null>(null);
   const [relatableNews, setRelatableNews] = useState<News[]>([]);
   const [trendingNews, setTrendingNews] = useState<News[]>([]);
+  const [comments,setComments] =  useState<Comment[]>([]);
+  const [isSaved , setIsSaved] =  useState<boolean>(false)
   const [isDescriptionExpanded, setIsDescriptionExpended] =
     useState<boolean>(false);
   const [readingTime, setReadingTime] = useState<number | null>(null);
@@ -34,13 +41,22 @@ const NewsDetails = () => {
 
   const fetchNewsDetails = async () => {
     try {
+      let savedNewsIds;
       const responseData = await fetchNewsById(id || "");
       setNews(responseData);
+
+      if(!loading && isAuthenticated){
+        const savedResponse = await fetchSavedNews();
+
+        savedNewsIds =  savedResponse.map((id:SavedNewsId)=>id.id)
+        setIsSaved(savedNewsIds.includes(id as string ))
+      }
 
       if (responseData.description) {
         const timeToRead = calculateReadingTime(responseData.description);
         setReadingTime(timeToRead);
       }
+      setComments(responseData.comments)
     } catch (error) {
       console.log("Error fetching News Details", error);
       toast.error("Error Fetching News Details");
@@ -98,6 +114,32 @@ const NewsDetails = () => {
     return match ? match[1] : null;
   }
 
+  const handleSaveToggle = async()=>{
+    if(!isAuthenticated){
+      toast.error("please login to save news")
+      navigate("/login")
+      return;
+    }
+
+    try {
+      if(isSaved){
+        await unsaveNewsbyId(id || "")
+        toast.success("News has been unsaved")
+      } else{
+        await savedNewsbyId(id || "")
+        toast.success("News has been saved")
+      }
+
+      setIsSaved(!isSaved)
+      
+    } catch (error) {
+
+      console.error("error saving news",error)
+      toast.error("Failed to save/unsave news")
+      
+    }
+  }
+
   if (!news) {
     return (
       <div className="flex justify-center items-center h-screen">
@@ -125,6 +167,17 @@ const NewsDetails = () => {
                 </span>
               </p>
             </div>
+            {user?.role === "subscriber" && (
+              <button
+              onClick={handleSaveToggle}
+              className={`text-2xl cursor-pointer ${isSaved ? "text-red-500":"text-gray-500"}`}
+              aria-label={isSaved ? "Unsave":"Save"}
+              >
+
+                {isSaved ? <FaBookmark /> : <FaRegBookmark />}
+              </button>
+            )}
+         
           </div>
           <div className="mb-4">
             {news.images.length > 1 ? (
@@ -318,6 +371,7 @@ const NewsDetails = () => {
               </p>
             )}
           </div>
+          <div className="mt-8">{id? <Comments newsId={id} comments={comments} fetchNewsDetails={fetchNewsDetails} />: null}</div>
         </div>
       </div>
       <div className="w-full lg:w-1/3 p-4 space-y-4">

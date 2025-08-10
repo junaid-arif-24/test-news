@@ -14,6 +14,10 @@ router.post('/create',auth,checkRole(['admin']),upload.array('images',12), newsC
 // Get all news
 router.get('/', newsController.getAllNews)
 
+//Get saved News
+
+router.get('/savedNews',auth, newsController.getSavedNews);
+
 //get trending news
 router.get('/trending',newsController.getTrendingNews);
 
@@ -33,6 +37,12 @@ router.put('/:id',auth ,checkRole(['admin']),upload.array("images",12), newsCont
 
 router.delete("/:id",auth,checkRole(['admin']),newsController.deleteNews)
 
+
+//Save News
+router.post('/:id/save',auth,newsController.saveNews)
+
+//UnSave News
+router.post('/:id/unsave',auth,newsController.unsaveNews)
 
 export default router;
 

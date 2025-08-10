@@ -1,5 +1,5 @@
 import axios from "axios";
-import { Category, News } from "../types/Dataprovider";
+import { Category, News, SavedNewsId ,Comment} from "../types/Dataprovider";
 
 const API_BASE_URL = "http://localhost:3000";
 console.log(import.meta.env.REACT_APP_API_BASE_URL);
@@ -164,9 +164,45 @@ export const fetchTrendingNews =async():Promise<News[]> =>{
   return response.data as News[]
 }
 
+export const savedNewsbyId = async(id:string)=>{
+  await apiClient.post(`/api/news/${id}/save`);
+}
+
+export const unsaveNewsbyId = async(id:string)=>{
+  await apiClient.post(`/api/news/${id}/unsave`)
+}
+
+
+export const fetchSavedNews = async (): Promise<SavedNewsId[]>=>{
+  const response = await apiClient.get("/api/news/savedNews")
+  return response.data as SavedNewsId[];
+
+}
 
 //delete news
 
 export const deleteNews = async(id:string)=>{
     await apiClient.delete(`/api/news/${id}`);
+}
+
+// Add comment 
+
+export const createComment =  async(newsId:string, comment: string): Promise<Comment>=>{
+  const response = await apiClient.post(`/api/comments/${newsId}/comments`,{text:comment })
+  return response.data;
+}
+
+//Delete Comment 
+export const deleteComment =  async(commentId:string)=>{
+  await apiClient.delete(`/api/comments/${commentId}`)
+
+
+}
+
+// Get All Comments 
+
+export const fetchAllComments = async(): Promise<Comment[]>=>{
+
+const response =  await apiClient.get("/api/comments/all")
+return response.data as Comment[];
 }

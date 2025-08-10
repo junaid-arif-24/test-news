@@ -11,12 +11,18 @@ export interface Category {
   newsCount: number;
 }
 
-export interface Comments  { 
+export interface Comment  { 
   _id:string;
   text:string;
   date:string;
   user:User;
   news:{title:string};
+}
+
+export interface CommentsProps{
+  newsId:string;
+  comments:Comment[];
+  fetchNewsDetails:()=>void;
 }
 
 export interface News {
@@ -32,4 +38,8 @@ export interface News {
   youtubeUrl  : string;
   views : number;
   comments : Comment[]
+}
+
+export interface SavedNewsId {
+  id: string
 }

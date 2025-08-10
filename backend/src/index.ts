@@ -5,6 +5,7 @@ import cors from "cors";
 import authRoutes from "./routes/auth";
 import categoryRoutes from "./routes/category";
 import newsRoutes from "./routes/news"
+import commentRoutes from "./routes/comment"
 dotenv.config();
 const app = express();
 const port = 3000;
@@ -26,6 +27,7 @@ mongoose
 app.use("/api/auth", authRoutes);
 app.use("/api/categories", categoryRoutes);
 app.use("/api/news", newsRoutes);
+app.use("/api/comments",commentRoutes)
 
 
 app.listen(port, () => {

@@ -152,8 +152,14 @@ export const getNewsById = async (req: Request, res: Response) => {
       res.status(401).json({ message: "News Not Found" });
       return;
     }
+    const comments = await Comment.find({news:id}).populate("user","name email");
 
-    res.status(200).json(news);
+    const newsWithComments =  {
+      ...news.toObject(),
+      comments:comments,
+    }
+
+    res.status(200).json(newsWithComments);
   } catch (error) {
     res.status(400).json({ mesaage: "Error in Fetching News" });
   }
@@ -239,3 +245,85 @@ export const deleteNews = async (req: Request, res: Response) => {
     res.status(400).json({ message: "Error in Deleting News" });
   }
 };
+
+export const saveNews = async(req:AuthRequest, res:Response)=>{
+  const {id} = req.params;
+  if(!req.userId){
+     res.status(401).json({message:"User Not Authentication"})
+    return;
+  }
+
+  try {
+    const user = await User.findById(req.userId);
+
+    if(!user){
+      res.status(404).json({message:"user not found"})
+    }
+      const newsId : any = new mongoose.Types.ObjectId(id);
+    if (!user.savedNews.includes(newsId)) {
+      user.savedNews.push(newsId);
+      await user.save();
+    }
+    res.status(201).json({message:"News Saved", savedNews: user.savedNews})
+
+  } catch (error) {
+
+    res.status(400).json({message:"Error saving news",error})
+    
+  }
+}
+
+export const unsaveNews = async(req:AuthRequest,res:Response)=>{
+  const {id} =  req.params;
+
+  if(!req.userId){
+    res.status(401).json({message:"user is not authenticated"})
+    return;
+  }
+
+  try {
+    const user = await User.findById(req.userId)
+
+    if(!user){
+      res.status(404).json({message:"User not found"})
+      return;
+    }
+    const newsId : any = new mongoose.Types.ObjectId(id);
+
+    if(user.savedNews.includes(newsId)){
+      user.savedNews = user.savedNews.filter(
+        (savedNewsId)=> newsId ==! savedNewsId 
+      )
+      await user.save();
+    }
+
+    res.status(200).json({message:"News unsaved", saveNews:user.savedNews})
+    
+  } catch (error) {
+    res.status(400).json({message:"error unsaving news", error})
+  }
+}
+
+
+export const getSavedNews =  async(req:AuthRequest, res:Response)=>{
+  if(!req.userId){
+    res.status(401).json({message:"user is not authenticated"})
+    return;
+  }
+
+  try {
+    const user = await User.findById(req.userId)
+    if(!user){
+      res.status(404).json({message:"User not found"})
+      return;
+    }
+    const savedNews =  user.savedNews;
+    res.status(200).json(savedNews)
+
+
+    
+  } catch (error) {
+    res.status(400).json({message:"Error fetching saved news",error})
+    
+  }
+}
