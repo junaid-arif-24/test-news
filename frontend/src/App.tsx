@@ -20,6 +20,8 @@ import ManageNews from "./pages/ManageNews";
 import AllNews from "./pages/AllNews";
 import CategoryNews from "./pages/CategoryNews";
 import NewsDetails from "./pages/NewsDetails";
+import UserProfile from "./pages/UserProfile";
+import { ProtectedRoute, ProtectedRouteAuth } from "./components/ProtectedRoutes";
 
 function App() {
   return (
@@ -32,7 +34,7 @@ function App() {
             <Route path="/" element={<HomePage />} />
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<ContactUs />} />
-            <Route path="/login" element={<Login />} />
+            <Route path="/login" element={<ProtectedRouteAuth><Login /></ProtectedRouteAuth>} />
             <Route path="/register" element={<Register />} />
             <Route path="/category" element={<CategoryPage /> } />
             <Route path="/all-news" element={<AllNews />} />
@@ -42,6 +44,7 @@ function App() {
               <AdminRoute>
                 <AdminDashboard>
                   <Routes>
+                    <Route path="profile" element={<UserProfile/>} />
                   <Route path="create-news" element={<CreateNewsPage />} />
                   <Route path="manage-category" element={<ManageCategories />}/>
                   <Route path="manage-news" element={<ManageNews />} />
@@ -53,7 +56,7 @@ function App() {
                 </AdminDashboard>
               </AdminRoute>
             } />
-
+            <Route path="profile" element={<ProtectedRoute><UserProfile /></ProtectedRoute> }/>
           
           </Routes>
           <Footer />

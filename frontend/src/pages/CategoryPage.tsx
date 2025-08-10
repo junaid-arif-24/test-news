@@ -103,7 +103,7 @@ const CategoryPage: React.FC = () => {
             return (
               <div
                 key={category._id}
-                className="bg-white rounded-lg shadow-md flex h-24 transition transform hover:scale-105 cursor-pointer"
+                className="bg-white rounded-lg shadow-md flex h-24 transition transform hover:scale-105 cursor-pointer "
               
               >
                 <div className="p-4 flex flex-col justify-between w-full">
@@ -117,7 +117,7 @@ const CategoryPage: React.FC = () => {
                   </div>
                   {
                     user?.role === "subscriber" && (
-                      <div className="flex justify-between mt-1">
+                      <div className="flex justify-between mt-0">
                         {
                           subscribedCategories.includes(category._id)?(
                             <button
@@ -133,7 +133,7 @@ const CategoryPage: React.FC = () => {
                             <button onClick={(e)=>{
                               e.stopPropagation();
                               handleSubscribe(category._id)
-                            }} className="bg-gray-500 hover:bg-gray-700 text-white text-sm font-semibold px-4 py-2 rounded">
+                            }} className="bg-red-500 hover:bg-gray-700 text-white text-sm font-semibold px-4 py-2 rounded">
                               Subscribe
                             </button>
                           )

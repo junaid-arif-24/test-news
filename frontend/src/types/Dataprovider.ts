@@ -2,7 +2,21 @@ export interface User {
     _id: string,
     name: string,
     email: string,
-    role: string
+    role: string,
+    subscriptions: Subscriptions[],
+    savedNews:SavedNews[],
+}
+  export interface SavedNews {
+    _id: string;
+    title: string;
+    date: string;
+    time: string;
+    images: string[];
+    category: Category;
+  }
+export interface Subscriptions{
+  _id:string,
+  name: string
 }
 
 export interface Category { 

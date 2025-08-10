@@ -2,12 +2,13 @@ import { Request, RequestHandler, Response } from "express";
 import User from "../model/User";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import { sendLoginWelcomeEmail, sendRegistrationWelcomeEmail } from "../utils/mailer";
-import dotenv from "dotenv";
+import {
+  sendLoginWelcomeEmail,
+  sendRegistrationWelcomeEmail,
+} from "../utils/mailer";
+import dotenv, { populate } from "dotenv";
 
 dotenv.config();
-
-
 
 interface RegisterRequest extends Request {
   body: {
@@ -25,7 +26,6 @@ interface LoginRequest extends Request {
   };
   userId?: string | undefined;
 }
-
 
 export const register = async (req: RegisterRequest, res: Response) => {
   const { name, email, password, role } = req.body;
@@ -63,7 +63,7 @@ export const register = async (req: RegisterRequest, res: Response) => {
         expiresIn: "12h",
       }
     );
-    await sendRegistrationWelcomeEmail(email, name)
+    await sendRegistrationWelcomeEmail(email, name);
 
     res.status(201).json({ result: user, token });
 
@@ -75,8 +75,6 @@ export const register = async (req: RegisterRequest, res: Response) => {
     });
   }
 };
-
-
 
 export const login = async (req: LoginRequest, res: Response) => {
   const { email, password } = req.body;
@@ -117,11 +115,10 @@ export const login = async (req: LoginRequest, res: Response) => {
         expiresIn: "12h",
       }
     );
-  
 
     res.status(200).json({ result: existingUser, token });
 
-    await sendLoginWelcomeEmail(email, existingUser.name)
+    await sendLoginWelcomeEmail(email, existingUser.name);
     return;
   } catch (error) {
     console.log("Error logging in user:", error);
@@ -132,21 +129,29 @@ export const login = async (req: LoginRequest, res: Response) => {
   }
 };
 
-export const getCurrentUser = async (req:Request, res: Response) =>{
-const userId = (req as any).userId;
+export const getCurrentUser = async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).userId;
 
-const user = await User.findById(userId).select("-password");
+    const user = await User.findById(userId).select("-password").populate("subscriptions", "name").populate({
+        path: "savedNews",
+        select: "title date time images category",
+        populate: { path: "category", select: "name" },
+      });
 
-if(!user){
-   res.status(404).json({message: "User not found"})
-   return;
-}
+    if (!user) {
+      res.status(404).json({ message: "User not found" });
+      return;
+    }
 
-res.status(200).json(user);
+    res.status(200).json(user);
+  } catch (error) {
+    console.log("Error fetching user", error)
+    res.status(400).json({message:"Something went wrong"})
+  }
+};
 
-}
-
-export const logout = (req:Request, res: Response) =>{
-  res.status(200).json({message:"user is logged out"});
+export const logout = (req: Request, res: Response) => {
+  res.status(200).json({ message: "user is logged out" });
   return;
-}
+};

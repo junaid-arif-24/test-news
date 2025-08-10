@@ -1,5 +1,5 @@
 import axios from "axios";
-import { Category, News, SavedNewsId ,Comment} from "../types/Dataprovider";
+import { Category, News, SavedNewsId ,Comment, User} from "../types/Dataprovider";
 
 const API_BASE_URL = "http://localhost:3000";
 console.log(import.meta.env.REACT_APP_API_BASE_URL);
@@ -39,14 +39,14 @@ export const logout = () => {
   return apiClient.post(`/api/auth/logout`);
 };
 
-export const getUser = async () => {
+export const getUser = async ():Promise<User> => {
   const token = localStorage.getItem('token') || "";
   const response = await apiClient.get(`/api/auth/user`,{
     headers:{
       Authorization : `Bearer ${token}`
     }
   });
-  return response.data;
+  return response.data as User;
 };
 
 export const fetchCategories = async (): Promise<Category[]> => {
